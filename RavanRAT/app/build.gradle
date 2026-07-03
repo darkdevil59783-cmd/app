@@ -1,0 +1,84 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Load keystore properties from file
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace 'com.security.ravan'
+    compileSdk 34
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    defaultConfig {
+        applicationId "com.security.ravan"
+        minSdk 26
+        targetSdk 34
+        versionCode 665
+        versionName "9.1.6"
+        
+        // Read WEBHOOK_URL from local.properties
+        def localProperties = new Properties()
+        def localPropertiesFile = rootProject.file('local.properties')
+        if (localPropertiesFile.exists()) {
+            localProperties.load(new FileInputStream(localPropertiesFile))
+        }
+        
+        def webhookUrl = localProperties['WEBHOOK_URL'] ?: ""
+        buildConfigField "String", "WEBHOOK_URL", "\"${webhookUrl}\""
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile rootProject.file(keystoreProperties['storeFile'] ?: 'ravan-keystore.jks')
+                storePassword keystoreProperties['storePassword'] ?: 'ravan123'
+                keyAlias keystoreProperties['keyAlias'] ?: 'ravan-key'
+                keyPassword keystoreProperties['keyPassword'] ?: 'ravan123'
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists() && !project.hasProperty("disableSigning")) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+}
+
+
+
+
+
+
