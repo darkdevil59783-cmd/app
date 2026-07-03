@@ -24,7 +24,7 @@ jobs:
         run: chmod +x RavanRAT/gradlew
 
       - name: Build with Gradle
-        run: cd client && ./gradlew assembleDebug
+        run: cd RavanRAT && ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
